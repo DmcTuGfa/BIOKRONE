@@ -18,18 +18,15 @@ export function Navbar({ onScrollTo }: NavbarProps) {
   const isHomePage = pathname === "/"
 
   const navItems = [
-    { label: "Inicio", href: "/", section: "hero" },
+    { label: "Inicio",    href: "/",         section: "hero" },
     { label: "Cobertura", href: "/#cobertura", section: "cobertura" },
-    { label: "Productos", href: "/productos", section: "productos" },
-    { label: "Tienda", href: "/tienda", section: "" },
-    { label: "Acerca de", href: "/nosotros", section: "" },
-    { label: "Contacto", href: "/contacto", section: "contacto" },
+    { label: "Tienda",    href: "/tienda",    section: "" },
+    { label: "Acerca de", href: "/nosotros",  section: "" },
+    { label: "Contacto",  href: "/contacto",  section: "contacto" },
   ]
 
   const handleNavClick = (item: { href: string; section: string }) => {
-    if (isHomePage && item.section && onScrollTo) {
-      onScrollTo(item.section)
-    }
+    if (isHomePage && item.section && onScrollTo) onScrollTo(item.section)
     setIsOpen(false)
   }
 

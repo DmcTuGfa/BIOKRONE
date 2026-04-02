@@ -16,7 +16,7 @@ export function Footer() {
               BIOKRONE
             </Link>
             <p className="text-background/70 text-sm max-w-md">
-              Empresa mexicana líder en el desarrollo y comercialización de productos biológicos para la agricultura sustentable. Comprometidos con el medio ambiente y la productividad del campo.
+              Empresa mexicana líder en el desarrollo y comercialización de productos biológicos para la agricultura sustentable.
             </p>
           </div>
 
@@ -26,8 +26,7 @@ export function Footer() {
               {[
                 { label: "Inicio", href: "/" },
                 { label: "Cobertura", href: "/#cobertura" },
-                { label: "Productos", href: "/productos" },
-                { label: "Tienda en línea", href: "/tienda" },
+                { label: "Tienda", href: "/tienda" },
                 { label: "Acerca de nosotros", href: "/nosotros" },
                 { label: "Contacto", href: "/contacto" },
               ].map(item => (
@@ -42,9 +41,9 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Categorías</h4>
             <ul className="space-y-2 text-sm text-background/70">
               {[
-                { label: "Fungicidas", href: "/productos?categoria=FUNGICIDAS" },
-                { label: "Biofortificantes", href: "/productos?categoria=BIOFORTIFICANTES" },
-                { label: "Bioinsecticidas", href: "/productos?categoria=BIOINSECTICIDAS" },
+                { label: "Fungicidas",        href: "/tienda?categoria=FUNGICIDAS" },
+                { label: "Biofortificantes",  href: "/tienda?categoria=BIOFORTIFICANTES" },
+                { label: "Bioinsecticidas",   href: "/tienda?categoria=BIOINSECTICIDAS" },
               ].map(item => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:text-background transition-colors">{item.label}</Link>
@@ -55,9 +54,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-background/10 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-background/50">
-            {new Date().getFullYear()} BIOKRONE. Todos los derechos reservados.
-          </p>
+          <p className="text-sm text-background/50">{new Date().getFullYear()} BIOKRONE. Todos los derechos reservados.</p>
           <div className="flex gap-6 text-sm text-background/50">
             <a href="#" className="hover:text-background transition-colors">Aviso de privacidad</a>
             <a href="#" className="hover:text-background transition-colors">Términos y condiciones</a>
