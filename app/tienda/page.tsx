@@ -33,10 +33,18 @@ const catIcons: Record<string, React.ElementType> = {
   BIOFORTIFICANTES: Leaf,
 }
 
-const catColors: Record<string, string> = {
+const catColors: Record<Category, string> = {
+  all: "text-slate-600 dark:text-slate-300 bg-slate-500/10 border-slate-500/30",
   FUNGICIDAS: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/30",
   BIOINSECTICIDAS: "text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/30",
   BIOFORTIFICANTES: "text-green-600 dark:text-green-400 bg-green-500/10 border-green-500/30",
+}
+
+const catIconColors: Record<Category, string> = {
+  all: "text-slate-600 dark:text-slate-300",
+  FUNGICIDAS: "text-blue-600 dark:text-blue-400",
+  BIOINSECTICIDAS: "text-orange-600 dark:text-orange-400",
+  BIOFORTIFICANTES: "text-green-600 dark:text-green-400",
 }
 
 const catLabels: Record<string, string> = {
@@ -154,29 +162,31 @@ export default function TiendaPage() {
           </div>
         )}
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
-              const isActive = category === cat
-              const Icon = cat !== "all" ? catIcons[cat] : Leaf
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+  {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
+    const isActive = category === cat
+    const Icon = cat !== "all" ? catIcons[cat] : Leaf
+    const colorClass = catColors[cat]
 
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
-                    isActive ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-muted"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <Icon className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
-                  </div>
-                  <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
-                </button>
-              )
-            })}
-          </div>
+    return (
+      <button
+        key={cat}
+        onClick={() => setCategory(cat)}
+        className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
+          isActive
+            ? `${colorClass} shadow-sm`
+            : "border-border bg-card hover:bg-muted"
+        }`}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <Icon className={`h-5 w-5 ${isActive ? colorClass.split(" ")[0] : "text-muted-foreground"}`} />
+          <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
+        </div>
+        <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
+      </button>
+    )
+  })}
+</div>
 
           <div className="relative max-w-sm mb-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
