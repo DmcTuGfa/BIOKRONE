@@ -46,7 +46,7 @@ export default function Home() {
 
             {/* Category Cards */}
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
-              <Link href="/productos?categoria=FUNGICIDAS">
+              <Link href="/tienda?categoria=FUNGICIDAS">
                 <Card className="group hover:shadow-lg transition-all hover:border-blue-500/50 cursor-pointer h-full">
                   <CardContent className="p-6 text-center">
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-500/10 mb-4 group-hover:scale-110 transition-transform">
@@ -60,7 +60,7 @@ export default function Home() {
                 </Card>
               </Link>
 
-              <Link href="/productos?categoria=BIOINSECTICIDAS">
+              <Link href="/tienda?categoria=BIOINSECTICIDAS">
                 <Card className="group hover:shadow-lg transition-all hover:border-orange-500/50 cursor-pointer h-full">
                   <CardContent className="p-6 text-center">
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-orange-500/10 mb-4 group-hover:scale-110 transition-transform">
@@ -74,7 +74,7 @@ export default function Home() {
                 </Card>
               </Link>
 
-              <Link href="/productos?categoria=BIOFORTIFICANTES">
+              <Link href="/tienda?categoria=BIOFORTIFICANTES">
                 <Card className="group hover:shadow-lg transition-all hover:border-green-500/50 cursor-pointer h-full">
                   <CardContent className="p-6 text-center">
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-green-500/10 mb-4 group-hover:scale-110 transition-transform">
@@ -91,7 +91,7 @@ export default function Home() {
 
             <div className="text-center">
               <Button asChild size="lg">
-                <Link href="/productos">
+                <Link href="/tienda">
                   Ver todos los productos
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

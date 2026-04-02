@@ -1,22 +1,27 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
-import type { Product } from "@/components/product-card"
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 
 export interface CartItem {
-  product: Product
+  id: string
+  name: string
+  slug: string
+  price: number
+  priceDisplay: string
   quantity: number
+  presentation: string
+  image: string
+  category: string
 }
 
 interface CartContextType {
   items: CartItem[]
-  addToCart: (product: Product, quantity?: number) => void
-  removeFromCart: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addToCart: (item: Omit<CartItem, "quantity">, qty?: number) => void
+  removeFromCart: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
-  getCartTotal: () => number
-  getItemCount: () => number
-  isInCart: (productId: string) => boolean
+  totalItems: number
+  totalPrice: number
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -24,74 +29,49 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
 
-  const addToCart = useCallback((product: Product, quantity: number = 1) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.product.id === product.id)
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        )
-      }
-      return [...prevItems, { product, quantity }]
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("biokrone_cart")
+      if (saved) setItems(JSON.parse(saved))
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("biokrone_cart", JSON.stringify(items))
+    sessionStorage.setItem("biokrone_cart", JSON.stringify(items))
+  }, [items])
+
+  const addToCart = useCallback((item: Omit<CartItem, "quantity">, qty = 1) => {
+    setItems(prev => {
+      const exists = prev.find(i => i.id === item.id)
+      if (exists) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + qty } : i)
+      return [...prev, { ...item, quantity: qty }]
     })
   }, [])
 
-  const removeFromCart = useCallback((productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.product.id !== productId))
+  const removeFromCart = useCallback((id: string) => {
+    setItems(prev => prev.filter(i => i.id !== id))
   }, [])
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId)
-      return
-    }
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
-    )
-  }, [removeFromCart])
-
-  const clearCart = useCallback(() => {
-    setItems([])
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    if (quantity <= 0) { setItems(prev => prev.filter(i => i.id !== id)); return }
+    setItems(prev => prev.map(i => i.id === id ? { ...i, quantity } : i))
   }, [])
 
-  const getCartTotal = useCallback(() => {
-    return items.reduce((total, item) => total + item.quantity, 0)
-  }, [items])
+  const clearCart = useCallback(() => setItems([]), [])
 
-  const getItemCount = useCallback(() => {
-    return items.length
-  }, [items])
-
-  const isInCart = useCallback((productId: string) => {
-    return items.some((item) => item.product.id === productId)
-  }, [items])
+  const totalItems = items.reduce((s, i) => s + i.quantity, 0)
+  const totalPrice = items.reduce((s, i) => s + i.price * i.quantity, 0)
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        getCartTotal,
-        getItemCount,
-        isInCart,
-      }}
-    >
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}>
       {children}
     </CartContext.Provider>
   )
 }
 
 export function useCart() {
-  const context = useContext(CartContext)
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider")
-  }
-  return context
+  const ctx = useContext(CartContext)
+  if (!ctx) throw new Error("useCart must be used within CartProvider")
+  return ctx
 }
