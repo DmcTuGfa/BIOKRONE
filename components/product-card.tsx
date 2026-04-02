@@ -73,7 +73,7 @@ export function ProductCard({ product }: ProductCardProps) {
           className="flex-1"
           variant="outline"
         >
-          <Link href={`/productos/${product.slug}`}>Ver detalle</Link>
+          <Link href={`/tienda/producto/${product.slug}`}>Ver detalle</Link>
         </Button>
         <Button 
           onClick={handleAddToCart}
