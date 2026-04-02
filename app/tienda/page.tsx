@@ -145,7 +145,7 @@ export default function TiendaPage() {
           </div>
         </section>
 
-        {totalItems > 0 && (
+                {totalItems > 0 && (
           <div className="sticky top-16 z-40 bg-primary text-primary-foreground py-3 shadow-md">
             <div className="container mx-auto px-4 flex items-center justify-between">
               <span className="text-sm font-medium flex items-center gap-2">
@@ -162,7 +162,10 @@ export default function TiendaPage() {
           </div>
         )}
 
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+
+          
   {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
     const isActive = category === cat
     const Icon = cat !== "all" ? catIcons[cat] : Leaf
