@@ -1,295 +1,278 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useState, useMemo, useEffect } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/contexts/cart-context"
-import { Lock, ArrowLeft, CreditCard, ShieldCheck, Truck, AlertCircle, Loader2, Minus, Plus, Trash2 } from "lucide-react"
+import { productsData } from "@/lib/products-data"
+import { storeProducts } from "@/lib/store-products"
+import {
+  ShoppingCart,
+  Search,
+  Leaf,
+  Bug,
+  Shield,
+  CheckCircle2,
+  Lock,
+  Truck,
+  Star,
+  RefreshCw,
+  Package,
+} from "lucide-react"
 
-function StripePaymentForm({ clientSecret, onSuccess }: { clientSecret: string; onSuccess: () => void }) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [cardReady, setCardReady] = useState(false)
-  const stripeRef = useRef<any>(null)
-  const cardRef = useRef<any>(null)
-  const mountedRef = useRef(false)
+type Category = "all" | "FUNGICIDAS" | "BIOINSECTICIDAS" | "BIOFORTIFICANTES"
 
-  useEffect(() => {
-    if (mountedRef.current) return
-    mountedRef.current = true
-
-    const init = async () => {
-      try {
-        const { loadStripe } = await import("@stripe/stripe-js")
-        const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
-        if (!stripe) { setError("No se pudo cargar Stripe. Verifica tu conexión."); return }
-
-        stripeRef.current = stripe
-        const elements = stripe.elements({ clientSecret })
-        const card = elements.create("card", {
-          style: {
-            base: {
-              fontSize: "16px",
-              color: "#ffffff",
-              fontFamily: "inherit",
-              "::placeholder": { color: "#6b7280" },
-            },
-            invalid: { color: "#ef4444" },
-          },
-          hidePostalCode: true,
-        })
-        cardRef.current = card
-        card.mount("#card-element")
-        card.on("ready", () => setCardReady(true))
-        card.on("change", (e: any) => setError(e.error?.message ?? null))
-      } catch (e) {
-        setError("Error al inicializar el formulario de pago.")
-      }
-    }
-
-    init()
-
-    return () => {
-      if (cardRef.current) {
-        try { cardRef.current.unmount() } catch {}
-      }
-    }
-  }, [clientSecret])
-
-  const handlePay = async () => {
-    if (!stripeRef.current || !cardRef.current) return
-    setLoading(true)
-    setError(null)
-    try {
-      const { error: stripeError, paymentIntent } = await stripeRef.current.confirmCardPayment(clientSecret, {
-        payment_method: { card: cardRef.current },
-      })
-      if (stripeError) { setError(stripeError.message ?? "Error al procesar el pago."); setLoading(false) }
-      else if (paymentIntent?.status === "succeeded") onSuccess()
-    } catch {
-      setError("Error inesperado. Intenta de nuevo.")
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="p-4 rounded-xl border border-border bg-muted/30 min-h-[60px]">
-        <Label className="text-sm font-medium mb-3 block text-foreground">Número de tarjeta</Label>
-        <div id="card-element" className="py-1" />
-        {!cardReady && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-            <Loader2 className="h-3 w-3 animate-spin" />Cargando formulario seguro...
-          </div>
-        )}
-      </div>
-      {error && (
-        <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />{error}
-        </div>
-      )}
-      <Button className="w-full h-12 text-base" onClick={handlePay} disabled={loading || !cardReady}>
-        {loading
-          ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Procesando pago...</>
-          : <><Lock className="h-5 w-5 mr-2" />Pagar ahora</>}
-      </Button>
-      <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1.5">
-        <ShieldCheck className="h-3.5 w-3.5" />Pago cifrado y procesado por Stripe. No almacenamos tus datos.
-      </p>
-    </div>
-  )
+const catIcons: Record<string, React.ElementType> = {
+  FUNGICIDAS: Shield,
+  BIOINSECTICIDAS: Bug,
+  BIOFORTIFICANTES: Leaf,
 }
 
-export default function CheckoutPage() {
-  const router = useRouter()
-  const { items, updateQuantity, removeFromCart, clearCart, totalPrice } = useCart()
-  const [email, setEmail] = useState("")
-  const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
-  const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [step, setStep] = useState<"info" | "payment">("info")
+const catColors: Record<string, string> = {
+  FUNGICIDAS: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/30",
+  BIOINSECTICIDAS: "text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/30",
+  BIOFORTIFICANTES: "text-green-600 dark:text-green-400 bg-green-500/10 border-green-500/30",
+}
 
-  const totalDisplay = (totalPrice / 100).toLocaleString("es-MX", { minimumFractionDigits: 2 })
+const catLabels: Record<string, string> = {
+  all: "Todos",
+  FUNGICIDAS: "Fungicidas",
+  BIOINSECTICIDAS: "Bioinsecticidas",
+  BIOFORTIFICANTES: "Biofortificantes",
+}
 
-  const handleContinue = async () => {
-    if (!email || !name) return
-    setLoading(true); setError(null)
-    try {
-      const cartItems = items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, presentation: i.presentation }))
-      const res = await fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cartItems, customerEmail: email }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Error al crear el pago")
-      setClientSecret(data.clientSecret)
-      setStep("payment")
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error desconocido")
-    } finally { setLoading(false) }
+export default function TiendaPage() {
+  const [category, setCategory] = useState<Category>("all")
+  const [search, setSearch] = useState("")
+  const [addedId, setAddedId] = useState<string | null>(null)
+  const { addToCart, items, totalItems, totalPrice } = useCart()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const cat = params.get("categoria") as Category | null
+    if (cat && ["FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"].includes(cat)) {
+      setCategory(cat)
+    }
+  }, [])
+
+  const merged = useMemo(() => {
+    return productsData.map((p) => {
+      const s = storeProducts.find((x) => x.id === p.id)
+      return {
+        ...p,
+        price: s?.price ?? 0,
+        priceDisplay: s?.priceDisplay ?? "Consultar",
+      }
+    })
+  }, [])
+
+  const filtered = useMemo(() => {
+    return merged.filter((p) => {
+      const matchCat = category === "all" || p.category === category
+      const matchQ =
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase())
+      return matchCat && matchQ
+    })
+  }, [merged, category, search])
+
+  const stats = useMemo(() => {
+    return {
+      all: merged.length,
+      FUNGICIDAS: merged.filter((p) => p.category === "FUNGICIDAS").length,
+      BIOINSECTICIDAS: merged.filter((p) => p.category === "BIOINSECTICIDAS").length,
+      BIOFORTIFICANTES: merged.filter((p) => p.category === "BIOFORTIFICANTES").length,
+    }
+  }, [merged])
+
+  const handleAdd = (product: (typeof merged)[0]) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      priceDisplay: product.priceDisplay,
+      presentation: product.presentation,
+      image: product.image,
+      category: product.category,
+    })
+    setAddedId(product.id)
+    setTimeout(() => setAddedId(null), 1500)
   }
-
-  const handleSuccess = () => { clearCart(); router.push("/tienda/success") }
-
-  if (items.length === 0) return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Tu carrito está vacío</h2>
-          <Button asChild><Link href="/tienda">Ir a la tienda</Link></Button>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  )
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 bg-muted/30">
-        <div className="container mx-auto px-4 py-10">
-          <div className="flex items-center gap-3 mb-8">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/tienda"><ArrowLeft className="h-4 w-4 mr-1" />Volver</Link>
-            </Button>
-            <h1 className="text-2xl font-bold text-foreground">Finalizar compra</h1>
-          </div>
-
-          <div className="grid lg:grid-cols-5 gap-8 max-w-5xl mx-auto">
-            {/* Form */}
-            <div className="lg:col-span-3 space-y-6">
-              {step === "info" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Truck className="h-5 w-5 text-primary" />Información de contacto
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Nombre completo *</Label>
-                        <Input id="name" placeholder="Tu nombre" value={name} onChange={e => setName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Correo electrónico *</Label>
-                        <Input id="email" type="email" placeholder="tu@correo.com" value={email} onChange={e => setEmail(e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Teléfono</Label>
-                      <Input id="phone" type="tel" placeholder="+52 000 000 0000" value={phone} onChange={e => setPhone(e.target.value)} />
-                    </div>
-                    {error && (
-                      <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
-                        <AlertCircle className="h-4 w-4" />{error}
-                      </div>
-                    )}
-                    <Button className="w-full h-12 text-base" onClick={handleContinue} disabled={loading || !email || !name}>
-                      {loading
-                        ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Procesando...</>
-                        : <><CreditCard className="h-5 w-5 mr-2" />Continuar al pago</>}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-
-              {step === "payment" && clientSecret && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="h-5 w-5 text-primary" />Datos de pago
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4 p-3 rounded-lg bg-muted text-sm text-muted-foreground">
-                      Comprando como: <span className="font-medium text-foreground">{name}</span> ({email})
-                      <button className="ml-2 text-primary hover:underline text-xs" onClick={() => { setStep("info"); setClientSecret(null) }}>Cambiar</button>
-                    </div>
-                    <StripePaymentForm clientSecret={clientSecret} onSuccess={handleSuccess} />
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Order summary */}
-            <div className="lg:col-span-2">
-              <Card className="sticky top-24">
-                <CardHeader><CardTitle className="text-lg">Tu pedido</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  {items.map(item => (
-                    <div key={item.id} className="flex gap-3">
-                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
-                        <Image src={item.image} alt={item.name} fill className="object-cover" sizes="56px" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-foreground truncate">{item.name}</p>
-                        <p className="text-xs text-muted-foreground mb-2">{item.presentation}</p>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center border border-border rounded-lg overflow-hidden">
-                            <button onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="px-2 py-1 hover:bg-muted transition-colors">
-                              <Minus className="h-3 w-3 text-foreground" />
-                            </button>
-                            <span className="px-3 py-1 text-sm font-semibold text-foreground min-w-[2rem] text-center">
-                              {item.quantity}
-                            </span>
-                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="px-2 py-1 hover:bg-muted transition-colors">
-                              <Plus className="h-3 w-3 text-foreground" />
-                            </button>
-                          </div>
-                          <button onClick={() => removeFromCart(item.id)}
-                            className="text-muted-foreground hover:text-destructive transition-colors">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <span className="text-sm font-semibold whitespace-nowrap text-foreground">
-                        ${((item.price * item.quantity) / 100).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-                  ))}
-
-                  <Separator />
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="text-foreground">${totalDisplay} MXN</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Envío</span>
-                    <span className="text-green-600 dark:text-green-400">Se cotiza por zona</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between font-bold text-lg">
-                    <span className="text-foreground">Total</span>
-                    <span className="text-foreground">${totalDisplay} MXN</span>
-                  </div>
-
-                  <div className="pt-2 space-y-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-3.5 w-3.5 text-primary flex-shrink-0" />Pago procesado por Stripe
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Truck className="h-3.5 w-3.5 text-primary flex-shrink-0" />Envío confirmado por correo
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      <main className="flex-1">
+        <section className="bg-primary/5 border-b border-border py-10">
+          <div className="container mx-auto px-4">
+            <Badge className="mb-3 bg-primary/10 text-primary border-primary/20">
+              <Lock className="h-3.5 w-3.5 mr-1.5" />
+              Pagos seguros con Stripe
+            </Badge>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+              Catálogo de Productos
+            </h1>
+            <p className="text-muted-foreground mb-5">
+              Soluciones biológicas certificadas · Envío a toda la República Mexicana
+            </p>
+            <div className="flex flex-wrap gap-5 text-sm text-muted-foreground">
+              {[
+                { icon: Truck, label: "Envío a todo México" },
+                { icon: Lock, label: "Pago 100% seguro" },
+                { icon: RefreshCw, label: "Devoluciones en 7 días" },
+                { icon: Star, label: "Certificados COFEPRIS" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-primary" />
+                  <span>{label}</span>
+                </div>
+              ))}
             </div>
           </div>
+        </section>
+
+        {totalItems > 0 && (
+          <div className="sticky top-16 z-40 bg-primary text-primary-foreground py-3 shadow-md">
+            <div className="container mx-auto px-4 flex items-center justify-between">
+              <span className="text-sm font-medium flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                {totalItems} {totalItems === 1 ? "producto" : "productos"} —{" "}
+                <strong>
+                  ${(totalPrice / 100).toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN
+                </strong>
+              </span>
+              <Button size="sm" variant="secondary" onClick={() => (window.location.href = "/tienda/checkout")}>
+                Pagar →
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
+              const isActive = category === cat
+              const Icon = cat !== "all" ? catIcons[cat] : Leaf
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
+                    isActive ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-muted"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Icon className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
+                  </div>
+                  <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="relative max-w-sm mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar productos..."
+              className="pl-10"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <p className="text-sm text-muted-foreground mb-6">
+            {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
+          </p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filtered.map((product) => {
+              const Icon = catIcons[product.category]
+              const colorClass = catColors[product.category]
+              const isAdded = addedId === product.id
+              const inCart = items.find((i) => i.id === product.id)
+
+              return (
+                <div
+                  key={product.id}
+                  className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col group"
+                >
+                  <Link
+                    href={`/tienda/producto/${product.slug}`}
+                    className="block relative aspect-square bg-muted overflow-hidden"
+                  >
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw"
+                    />
+                    <div className="absolute top-2 left-2">
+                      <Badge variant="secondary" className={`text-xs border ${colorClass}`}>
+                        <Icon className="h-3 w-3 mr-1" />
+                        {catLabels[product.category]}
+                      </Badge>
+                    </div>
+                  </Link>
+
+                  <div className="p-4 flex-1 flex flex-col">
+                    <Link href={`/tienda/producto/${product.slug}`} className="hover:text-primary transition-colors">
+                      <h3 className="font-semibold text-foreground mb-0.5">{product.name}</h3>
+                    </Link>
+                    <p className="text-xs text-muted-foreground mb-2">{product.presentation}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{product.description}</p>
+
+                    <div className="flex items-center justify-between mt-4">
+                      <div>
+                        <span className="text-xl font-bold text-foreground">{product.priceDisplay}</span>
+                        <span className="text-xs text-muted-foreground ml-1">MXN</span>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        onClick={() => handleAdd(product)}
+                        className={isAdded ? "bg-green-600 hover:bg-green-700" : ""}
+                        disabled={isAdded}
+                      >
+                        {isAdded ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                            Agregado
+                          </>
+                        ) : inCart ? (
+                          <>
+                            <ShoppingCart className="h-4 w-4 mr-1" />
+                            ({inCart.quantity})
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="h-4 w-4 mr-1" />
+                            Agregar
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-20">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Sin resultados</h3>
+              <p className="text-muted-foreground">Intenta con otro filtro o búsqueda.</p>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
