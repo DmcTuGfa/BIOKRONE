@@ -191,33 +191,33 @@ export default function TiendaPage() {
   })}
 </div>
 
-                  <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
-              const isActive = category === cat
-              const Icon = cat !== "all" ? catIcons[cat] : Leaf
-              const colorClass = catColors[cat]
-              const iconColorClass = catIconColors[cat]
+          <div className="container mx-auto px-4 py-8">
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
+      const isActive = category === cat
+      const Icon = cat !== "all" ? catIcons[cat] : Leaf
+      const colorClass = catColors[cat]
+      const iconColorClass = catIconColors[cat]
 
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
-                    isActive
-                      ? `${colorClass} shadow-sm`
-                      : "border-border bg-card hover:bg-muted"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <Icon className={`h-5 w-5 ${isActive ? iconColorClass : "text-muted-foreground"}`} />
-                    <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
-                  </div>
-                  <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
-                </button>
-              )
-            })}
+      return (
+        <button
+          key={cat}
+          onClick={() => setCategory(cat)}
+          className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
+            isActive
+              ? `${colorClass} shadow-sm`
+              : "border-border bg-card hover:bg-muted"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <Icon className={`h-5 w-5 ${isActive ? iconColorClass : "text-muted-foreground"}`} />
+            <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
           </div>
+          <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
+        </button>
+      )
+    })}
+  </div>
                     
             {filtered.map((product) => {
               const Icon = catIcons[product.category]
