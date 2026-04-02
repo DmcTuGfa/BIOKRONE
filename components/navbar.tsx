@@ -4,9 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Leaf } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Menu, X, Leaf, ShoppingCart } from "lucide-react"
 import { ThemeToggle } from "./theme-toggle"
-import { CartDrawer } from "./cart-drawer"
+import { useCart } from "@/contexts/cart-context"
 
 interface NavbarProps {
   onScrollTo?: (section: string) => void
@@ -16,13 +17,14 @@ export function Navbar({ onScrollTo }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const isHomePage = pathname === "/"
+  const { totalItems } = useCart()
 
   const navItems = [
-    { label: "Inicio",    href: "/",         section: "hero" },
-    { label: "Cobertura", href: "/#cobertura", section: "cobertura" },
-    { label: "Tienda",    href: "/tienda",    section: "" },
-    { label: "Acerca de", href: "/nosotros",  section: "" },
-    { label: "Contacto",  href: "/contacto",  section: "contacto" },
+    { label: "Inicio",    href: "/",           section: "hero" },
+    { label: "Cobertura", href: "/#cobertura",  section: "cobertura" },
+    { label: "Tienda",    href: "/tienda",      section: "" },
+    { label: "Acerca de", href: "/nosotros",    section: "" },
+    { label: "Contacto",  href: "/contacto",    section: "contacto" },
   ]
 
   const handleNavClick = (item: { href: string; section: string }) => {
@@ -63,7 +65,17 @@ export function Navbar({ onScrollTo }: NavbarProps) {
 
           <div className="hidden md:flex items-center gap-2">
             <ThemeToggle />
-            <CartDrawer />
+            {/* Cart icon — goes to checkout */}
+            <Button variant="outline" size="icon" className="relative" asChild>
+              <Link href="/tienda/checkout">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground">
+                    {totalItems}
+                  </Badge>
+                )}
+              </Link>
+            </Button>
             <Button asChild>
               <Link href="/tienda">Comprar</Link>
             </Button>
@@ -71,7 +83,16 @@ export function Navbar({ onScrollTo }: NavbarProps) {
 
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
-            <CartDrawer />
+            <Button variant="outline" size="icon" className="relative" asChild>
+              <Link href="/tienda/checkout">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground">
+                    {totalItems}
+                  </Badge>
+                )}
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>

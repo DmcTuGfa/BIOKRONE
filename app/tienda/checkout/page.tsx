@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -19,7 +19,7 @@ function StripePaymentForm({ clientSecret, onSuccess }: { clientSecret: string; 
   const [error, setError] = useState<string | null>(null)
   const [cardReady, setCardReady] = useState(false)
 
-  useState(() => {
+  useEffect(() => {
     let mounted = true
     ;(async () => {
       const { loadStripe } = await import("@stripe/stripe-js")
