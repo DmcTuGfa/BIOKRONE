@@ -47,7 +47,7 @@ const catIconColors: Record<Category, string> = {
   BIOFORTIFICANTES: "text-green-600 dark:text-green-400",
 }
 
-const catLabels: Record<string, string> = {
+const catLabels: Record<Category, string> = {
   all: "Todos",
   FUNGICIDAS: "Fungicidas",
   BIOINSECTICIDAS: "Bioinsecticidas",
@@ -145,7 +145,7 @@ export default function TiendaPage() {
           </div>
         </section>
 
-                {totalItems > 0 && (
+        {totalItems > 0 && (
           <div className="sticky top-16 z-40 bg-primary text-primary-foreground py-3 shadow-md">
             <div className="container mx-auto px-4 flex items-center justify-between">
               <span className="text-sm font-medium flex items-center gap-2">
@@ -155,7 +155,11 @@ export default function TiendaPage() {
                   ${(totalPrice / 100).toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN
                 </strong>
               </span>
-              <Button size="sm" variant="secondary" onClick={() => (window.location.href = "/tienda/checkout")}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => (window.location.href = "/tienda/checkout")}
+              >
                 Pagar →
               </Button>
             </div>
@@ -164,35 +168,47 @@ export default function TiendaPage() {
 
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
+              const isActive = category === cat
+              const Icon = cat !== "all" ? catIcons[cat] : Leaf
+              const colorClass = catColors[cat]
+              const iconColorClass = catIconColors[cat]
 
-          <div className="container mx-auto px-4 py-8">
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-    {(["all", "FUNGICIDAS", "BIOINSECTICIDAS", "BIOFORTIFICANTES"] as Category[]).map((cat) => {
-      const isActive = category === cat
-      const Icon = cat !== "all" ? catIcons[cat] : Leaf
-      const colorClass = catColors[cat]
-      const iconColorClass = catIconColors[cat]
-
-      return (
-        <button
-          key={cat}
-          onClick={() => setCategory(cat)}
-          className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
-            isActive
-              ? `${colorClass} shadow-sm`
-              : "border-border bg-card hover:bg-muted"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <Icon className={`h-5 w-5 ${isActive ? iconColorClass : "text-muted-foreground"}`} />
-            <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
+                    isActive
+                      ? `${colorClass} shadow-sm`
+                      : "border-border bg-card hover:bg-muted"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Icon className={`h-5 w-5 ${isActive ? iconColorClass : "text-muted-foreground"}`} />
+                    <span className="text-xl font-bold text-foreground">{stats[cat]}</span>
+                  </div>
+                  <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
+                </button>
+              )
+            })}
           </div>
-          <p className="text-sm font-medium text-foreground">{catLabels[cat]}</p>
-        </button>
-      )
-    })}
-  </div>
-                    
+
+          <div className="relative max-w-sm mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar productos..."
+              className="pl-10"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <p className="text-sm text-muted-foreground mb-6">
+            {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
+          </p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map((product) => {
               const Icon = catIcons[product.category]
               const colorClass = catColors[product.category]
@@ -213,7 +229,7 @@ export default function TiendaPage() {
                       alt={product.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw"
+                      sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 25vw"
                     />
                     <div className="absolute top-2 left-2">
                       <Badge variant="secondary" className={`text-xs border ${colorClass}`}>
@@ -224,11 +240,16 @@ export default function TiendaPage() {
                   </Link>
 
                   <div className="p-4 flex-1 flex flex-col">
-                    <Link href={`/tienda/producto/${product.slug}`} className="hover:text-primary transition-colors">
+                    <Link
+                      href={`/tienda/producto/${product.slug}`}
+                      className="hover:text-primary transition-colors"
+                    >
                       <h3 className="font-semibold text-foreground mb-0.5">{product.name}</h3>
                     </Link>
                     <p className="text-xs text-muted-foreground mb-2">{product.presentation}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{product.description}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
+                      {product.description}
+                    </p>
 
                     <div className="flex items-center justify-between mt-4">
                       <div>
