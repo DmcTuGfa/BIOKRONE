@@ -254,32 +254,40 @@ export default function TiendaPage() {
                     <div className="flex items-center justify-between mt-4">
                       <div>
                         <span className="text-xl font-bold text-foreground">{product.priceDisplay}</span>
-                        <span className="text-xs text-muted-foreground ml-1">MXN</span>
+                        {product.price > 0 && <span className="text-xs text-muted-foreground ml-1">MXN</span>}
                       </div>
 
-                      <Button
-                        size="sm"
-                        onClick={() => handleAdd(product)}
-                        className={isAdded ? "bg-green-600 hover:bg-green-700" : ""}
-                        disabled={isAdded}
-                      >
-                        {isAdded ? (
-                          <>
-                            <CheckCircle2 className="h-4 w-4 mr-1" />
-                            Agregado
-                          </>
-                        ) : inCart ? (
-                          <>
-                            <ShoppingCart className="h-4 w-4 mr-1" />
-                            ({inCart.quantity})
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingCart className="h-4 w-4 mr-1" />
-                            Agregar
-                          </>
-                        )}
-                      </Button>
+                      {product.price === 0 ? (
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={`https://wa.me/524611021115?text=Hola,%20me%20interesa%20cotizar%20${encodeURIComponent(product.name)}`} target="_blank" rel="noopener noreferrer">
+                            Consultar precio
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => handleAdd(product)}
+                          className={isAdded ? "bg-green-600 hover:bg-green-700" : ""}
+                          disabled={isAdded}
+                        >
+                          {isAdded ? (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                              Agregado
+                            </>
+                          ) : inCart ? (
+                            <>
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              ({inCart.quantity})
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              Agregar
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
