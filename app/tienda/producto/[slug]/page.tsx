@@ -106,7 +106,7 @@ export default function ProductoPage() {
               {/* Price */}
               <div className="flex items-baseline gap-2 mb-8">
                 <span className="text-4xl font-bold text-foreground">{priceDisplay}</span>
-                {price > 0 && <span className="text-muted-foreground">MXN / unidad</span>}
+                <span className="text-muted-foreground">MXN / unidad</span>
               </div>
 
               {/* Qty + Add to cart */}
@@ -123,21 +123,13 @@ export default function ProductoPage() {
                   </button>
                 </div>
 
-                {price === 0 ? (
-                  <Button size="lg" variant="outline" className="flex-1 h-12 text-base" asChild>
-                    <a href={`https://wa.me/524611021115?text=Hola,%20me%20interesa%20cotizar%20${encodeURIComponent(product.name)}`} target="_blank" rel="noopener noreferrer">
-                      Consultar precio por WhatsApp
-                    </a>
-                  </Button>
-                ) : (
-                  <Button size="lg" onClick={handleAddToCart}
-                    className={`flex-1 h-12 text-base ${added ? "bg-green-600 hover:bg-green-700" : ""}`}
-                    disabled={added}>
-                    {added
-                      ? <><CheckCircle2 className="h-5 w-5 mr-2" />¡Agregado al carrito!</>
-                      : <><ShoppingCart className="h-5 w-5 mr-2" />Agregar {qty > 1 ? `${qty} unidades` : "al carrito"}</>}
-                  </Button>
-                )}
+                <Button size="lg" onClick={handleAddToCart}
+                  className={`flex-1 h-12 text-base ${added ? "bg-green-600 hover:bg-green-700" : ""}`}
+                  disabled={added}>
+                  {added
+                    ? <><CheckCircle2 className="h-5 w-5 mr-2" />¡Agregado al carrito!</>
+                    : <><ShoppingCart className="h-5 w-5 mr-2" />Agregar {qty > 1 ? `${qty} unidades` : "al carrito"}</>}
+                </Button>
               </div>
 
               {inCart && (
@@ -146,12 +138,10 @@ export default function ProductoPage() {
                 </p>
               )}
 
-              {price > 0 && (
-                <Button variant="outline" size="lg" className="h-12 text-base"
-                  onClick={() => window.location.href = "/tienda/checkout"}>
-                  <CreditCard className="h-5 w-5 mr-2" />Comprar ahora
-                </Button>
-              )}
+              <Button variant="outline" size="lg" className="h-12 text-base"
+                onClick={() => window.location.href = "/tienda/checkout"}>
+                <CreditCard className="h-5 w-5 mr-2" />Comprar ahora
+              </Button>
 
               {/* Trust */}
               <div className="mt-8 pt-6 border-t border-border grid grid-cols-2 gap-3 text-sm text-muted-foreground">

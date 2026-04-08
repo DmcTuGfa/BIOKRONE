@@ -5,211 +5,35 @@ export interface StoreProduct {
   presentation: string
   category: "FUNGICIDAS" | "BIOINSECTICIDAS" | "BIOFORTIFICANTES"
   description: string
-  price: number        // centavos MXN para Stripe
-  priceDisplay: string // para mostrar
+  price: number // MXN cents (for Stripe)
+  priceDisplay: string
   image: string
   inStock: boolean
-  stripePriceId?: string
+  stripePriceId?: string // se llena con tu dashboard de Stripe
 }
 
-// Precios tomados de PRECIOS_WEB.xlsx (precio público por unidad)
 export const storeProducts: StoreProduct[] = [
-
-  // ── FUNGICIDAS ──────────────────────────────────────────────────────────────
-  {
-    id: "1",
-    name: "Baktillis",
-    slug: "baktillis",
-    presentation: "Suspensión concentrada 1L",
-    category: "FUNGICIDAS",
-    description: "Fungicida microbiológico a base de Bacillus subtilis de amplio espectro.",
-    price: 36000,          // $360 MXN
-    priceDisplay: "$360.00",
-    image: "/images/products/baktillis.png",
-    inStock: true,
-  },
-  {
-    id: "2",
-    name: "NatuControl",
-    slug: "natucontrol",
-    presentation: "Polvo humectable 400g",
-    category: "FUNGICIDAS",
-    description: "Fungicida biológico a base de Trichoderma harzianum.",
-    price: 58000,          // $580 MXN
-    priceDisplay: "$580.00",
-    image: "/images/products/natucontrol-new.png",
-    inStock: true,
-  },
-  {
-    id: "3",
-    name: "Alteza",
-    slug: "alteza",
-    presentation: "Polvo humectable 500g",
-    category: "FUNGICIDAS",
-    description: "Inoculante bioprotector radicular con consorcio de microorganismos benéficos.",
-    price: 75000,          // $750 MXN
-    priceDisplay: "$750.00",
-    image: "/images/products/alteza.png",
-    inStock: true,
-  },
-  {
-    id: "4",
-    name: "Nemagyne",
-    slug: "nemagyne",
-    presentation: "Concentrado emulsionable 1L",
-    category: "FUNGICIDAS",
-    description: "Coadyuvante nematicida con biopolímeros y extractos botánicos.",
-    price: 55000,          // $550 MXN
-    priceDisplay: "$550.00",
-    image: "/images/products/nemagyne.png",
-    inStock: true,
-  },
-  {
-    id: "5",
-    name: "Nemakron",
-    slug: "nemakron",
-    presentation: "Polvo humectable 1kg",
-    category: "FUNGICIDAS",
-    description: "Fungicida nematicida biológico con consorcio de hongos entomopatógenos.",
-    price: 0,              // Sin precio en lista — consultar
-    priceDisplay: "Consultar",
-    image: "/images/products/nemakron.png",
-    inStock: true,
-  },
-  {
-    id: "6",
-    name: "Bac Ilia",
-    slug: "bac-ilia",
-    presentation: "Suspensión concentrada 1L",
-    category: "FUNGICIDAS",
-    description: "Fungicida microbiológico a base de Bacillus subtilis.",
-    price: 0,              // Precio de Procobi — consultar
-    priceDisplay: "Consultar",
-    image: "/images/products/bac-ilia.png",
-    inStock: true,
-  },
-
-  // ── BIOINSECTICIDAS ─────────────────────────────────────────────────────────
-  {
-    id: "7",
-    name: "Aba Krone",
-    slug: "aba-krone",
-    presentation: "Concentrado emulsionable 1L",
-    category: "BIOINSECTICIDAS",
-    description: "Insecticida a base de Abamectina 1.8% para control de ácaros y trips.",
-    price: 50000,          // $500 MXN
-    priceDisplay: "$500.00",
-    image: "/images/products/abakrone.png",
-    inStock: true,
-  },
-  {
-    id: "8",
-    name: "Ajick",
-    slug: "ajick",
-    presentation: "Solución acuosa 1L",
-    category: "BIOINSECTICIDAS",
-    description: "Repelente botánico a base de extracto de ajo (Allium sativum).",
-    price: 24000,          // $240 MXN
-    priceDisplay: "$240.00",
-    image: "/images/products/ajick-new.png",
-    inStock: true,
-  },
-  {
-    id: "9",
-    name: "AK-Neem",
-    slug: "ak-neem",
-    presentation: "Concentrado emulsionable 1L",
-    category: "BIOINSECTICIDAS",
-    description: "Insecticida botánico con Alicina y Capsaicina de amplio espectro.",
-    price: 0,              // Producto nuevo — consultar
-    priceDisplay: "Consultar",
-    image: "/images/products/ak-neem.png",
-    inStock: true,
-  },
-  {
-    id: "10",
-    name: "Azaním",
-    slug: "azanim",
-    presentation: "Concentrado emulsionable 1L",
-    category: "BIOINSECTICIDAS",
-    description: "Insecticida botánico a base de Azadiractina 3% (Neem).",
-    price: 63000,          // $630 MXN
-    priceDisplay: "$630.00",
-    image: "/images/products/azanim-new.png",
-    inStock: true,
-  },
-
-  // ── BIOFORTIFICANTES ────────────────────────────────────────────────────────
-  {
-    id: "11",
-    name: "Glumix",
-    slug: "glumix",
-    presentation: "Polvo inoculante 1kg",
-    category: "BIOFORTIFICANTES",
-    description: "Inoculante a base de hongos endomicorrízicos VAM.",
-    price: 33000,          // $330 MXN
-    priceDisplay: "$330.00",
-    image: "/images/products/glumix-new.png",
-    inStock: true,
-  },
-  {
-    id: "12",
-    name: "Glumix Irrigation",
-    slug: "glumix-irrigation",
-    presentation: "Sólido granulado 1kg",
-    category: "BIOFORTIFICANTES",
-    description: "Bioactivador radicular con micorrizas, ácidos húmicos y fúlvicos.",
-    price: 80000,          // $800 MXN
-    priceDisplay: "$800.00",
-    image: "/images/products/glumix-irrigation.png",
-    inStock: true,
-  },
-  {
-    id: "13",
-    name: "AZSeed",
-    slug: "azseed",
-    presentation: "Polvo humectable 100g",
-    category: "BIOFORTIFICANTES",
-    description: "Inoculante de semillas con bacterias fijadoras de nitrógeno.",
-    price: 21000,          // $210 MXN (AZ SEED TS 100g)
-    priceDisplay: "$210.00",
-    image: "/images/products/azseed-new.png",
-    inStock: true,
-  },
-  {
-    id: "14",
-    name: "Amikrone 1L",
-    slug: "amikrone-1l",
-    presentation: "Líquido concentrado 1L",
-    category: "BIOFORTIFICANTES",
-    description: "Fertilizante orgánico líquido a base de L-Aminoácidos libres.",
-    price: 31000,          // $310 MXN
-    priceDisplay: "$310.00",
-    image: "/images/products/amikrone.png",
-    inStock: true,
-  },
-  {
-    id: "15",
-    name: "Amikrone 500mL",
-    slug: "amikrone-500ml",
-    presentation: "Líquido concentrado 500mL",
-    category: "BIOFORTIFICANTES",
-    description: "Presentación de 500mL del fertilizante orgánico L-Aminoácidos.",
-    price: 16800,          // $168 MXN
-    priceDisplay: "$168.00",
-    image: "/images/products/amikrone-500ml.png",
-    inStock: true,
-  },
-  {
-    id: "16",
-    name: "BioElicitor",
-    slug: "bioelicitor",
-    presentation: "Líquido concentrado 1L",
-    category: "BIOFORTIFICANTES",
-    description: "Fertilizante orgánico a base de extracto de algas marinas con citocininas.",
-    price: 32200,          // $322 MXN
-    priceDisplay: "$322.00",
-    image: "/images/products/bio-elicitor.png",
-    inStock: true,
-  },
+  { id: "1",  name: "Baktilis",           slug: "baktilis",           presentation: "Suspensión concentrada 1L",    category: "FUNGICIDAS",       description: "Biofungicida y bactericida de amplio espectro.", price: 89000, priceDisplay: "$890.00", image: "/images/products/baktilis.jpg",           inStock: true },
+  { id: "2",  name: "NatuControl",        slug: "natucontrol",        presentation: "Polvo humectable 400g",        category: "FUNGICIDAS",       description: "Nematicida biológico para cultivos de alto valor.", price: 76000, priceDisplay: "$760.00", image: "/images/products/natucontrol.jpg",        inStock: true },
+  { id: "3",  name: "BioCopper",          slug: "biocopper",          presentation: "Gránulos dispersables 1kg",    category: "FUNGICIDAS",       description: "Fungicida cúprico de origen biológico.", price: 65000, priceDisplay: "$650.00", image: "/images/products/biocopper.jpg",          inStock: true },
+  { id: "4",  name: "BioCopper Mix Pro",  slug: "biocopper-mix-pro",  presentation: "Gránulos dispersables 1kg",    category: "FUNGICIDAS",       description: "Formulación mejorada de acción sistémica y contacto.", price: 82000, priceDisplay: "$820.00", image: "/images/products/biocopper-mix-pro.jpg",  inStock: true },
+  { id: "5",  name: "Glumix Migration",   slug: "glumix-migration",   presentation: "Sólido granulado 1kg",         category: "BIOFORTIFICANTES", description: "Biofortificante con microorganismos benéficos.", price: 59000, priceDisplay: "$590.00", image: "/images/products/glumix-migration.jpg",   inStock: true },
+  { id: "6",  name: "Glumix",             slug: "glumix",             presentation: "Polvo soluble 1kg",            category: "BIOFORTIFICANTES", description: "Bioestimulante a base de aminoácidos y extractos vegetales.", price: 54000, priceDisplay: "$540.00", image: "/images/products/glumix.jpg",             inStock: true },
+  { id: "7",  name: "AZSeed",             slug: "azseed",             presentation: "Polvo humectable 100g",        category: "BIOFORTIFICANTES", description: "Tratamiento de semillas con bacterias fijadoras de nitrógeno.", price: 38000, priceDisplay: "$380.00", image: "/images/products/azseed.jpg",             inStock: true },
+  { id: "8",  name: "AmiTone",            slug: "amitone",            presentation: "Líquido concentrado 1L",       category: "BIOFORTIFICANTES", description: "Bioestimulante foliar rico en aminoácidos libres.", price: 61000, priceDisplay: "$610.00", image: "/images/products/amitone.jpg",            inStock: true },
+  { id: "9",  name: "BioElicitor",        slug: "bioelicitor",        presentation: "Líquido concentrado 1L",       category: "BIOFORTIFICANTES", description: "Activador de defensas naturales de la planta.", price: 72000, priceDisplay: "$720.00", image: "/images/products/bioelicitor.jpg",        inStock: true },
+  { id: "10", name: "Recento",            slug: "recento",            presentation: "Líquido concentrado 1L",       category: "BIOFORTIFICANTES", description: "Biofortificante que mejora cuajado de frutos.", price: 67000, priceDisplay: "$670.00", image: "/images/products/recento.jpg",            inStock: true },
+  { id: "11", name: "EPA 90",             slug: "epa-90",             presentation: "Líquido emulsionable 1L",      category: "BIOINSECTICIDAS",  description: "Bioinsecticida de amplio espectro a base de Neem.", price: 78000, priceDisplay: "$780.00", image: "/images/products/epa-90.jpg",             inStock: true },
+  { id: "12", name: "Ajick",              slug: "ajick",              presentation: "Solución acuosa 1L",           category: "BIOINSECTICIDAS",  description: "Repelente natural a base de extractos de ajo.", price: 42000, priceDisplay: "$420.00", image: "/images/products/ajick.jpg",              inStock: true },
+  { id: "13", name: "Azanim",             slug: "azanim",             presentation: "Concentrado emulsionable 1L",  category: "BIOINSECTICIDAS",  description: "Insecticida botánico a base de azadiractina.", price: 85000, priceDisplay: "$850.00", image: "/images/products/azanim.jpg",             inStock: true },
+  { id: "14", name: "Capsikron",          slug: "capsikron",          presentation: "Líquido concentrado 1L",       category: "BIOINSECTICIDAS",  description: "Bioinsecticida a base de capsaicina.", price: 48000, priceDisplay: "$480.00", image: "/images/products/capsikron.jpg",          inStock: true },
+  { id: "15", name: "Pirelium",           slug: "pirelium",           presentation: "Líquido concentrado 1L",       category: "BIOINSECTICIDAS",  description: "Insecticida natural a base de piretrinas.", price: 55000, priceDisplay: "$550.00", image: "/images/products/pirelium.jpg",           inStock: true },
+  { id: "16", name: "CinnAnim",           slug: "cinnanim",           presentation: "Líquido concentrado 1L",       category: "BIOINSECTICIDAS",  description: "Fungicida e insecticida a base de extracto de canela.", price: 51000, priceDisplay: "$510.00", image: "/images/products/cinnanim.jpg",           inStock: true },
 ]
+
+export const storeCategoryLabels: Record<string, string> = {
+  all: "Todos los productos",
+  FUNGICIDAS: "Fungicidas",
+  BIOINSECTICIDAS: "Bioinsecticidas",
+  BIOFORTIFICANTES: "Biofortificantes",
+}
